@@ -16,13 +16,16 @@ def _pct(a: float, b: float) -> str:
 
 
 def format_signal(sig: Signal) -> str:
-    is_long      = sig.direction == "LONG"
-    head         = "🟢" if is_long else "🔴"
-    dir_e        = "📈" if is_long else "📉"
-    sl_arrow     = "⬇️" if is_long else "⬆️"
-    tp_arrow     = "⬆️" if is_long else "⬇️"
-    bar          = "█" * sig.score + "░" * (5 - sig.score)
-    confidence   = int(sig.score / 5 * 100)
+    from lib.config import LEVERAGE_RANGE
+    is_long    = sig.direction == "LONG"
+    head       = "🟢" if is_long else "🔴"
+    dir_e      = "📈" if is_long else "📉"
+    sl_arrow   = "⬇️" if is_long else "⬆️"
+    tp_arrow   = "⬆️" if is_long else "⬇️"
+    bar        = "█" * sig.score + "░" * (5 - sig.score)
+    confidence = int(sig.score / 5 * 100)
+    # Strip exchange suffix for display: BTC/USDT:USDT → BTC/USDT PERP
+    display_sym = sig.symbol.split(":")[0] + " PERP" if ":" in sig.symbol else sig.symbol
 
     votes = []
     for name, vote in sig.strategies.items():
@@ -30,18 +33,19 @@ def format_signal(sig: Signal) -> str:
         votes.append(f"  {icon} {name}")
 
     return (
-        f"{head} <b>{sig.direction} — {sig.symbol}</b> {dir_e}\n"
+        f"{head} <b>FUTURES {sig.direction} — {display_sym}</b> {dir_e}\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"📊 <b>Entry:</b>     <code>{_fmt(sig.entry)}</code>\n"
-        f"{sl_arrow} <b>Stop Loss:</b>  <code>{_fmt(sig.sl)}</code>  <i>(-{_pct(sig.entry, sig.sl)})</i>\n"
-        f"{tp_arrow} <b>TP1:</b>       <code>{_fmt(sig.tp1)}</code>  <i>(+{_pct(sig.tp1, sig.entry)})</i>\n"
-        f"{tp_arrow} <b>TP2:</b>       <code>{_fmt(sig.tp2)}</code>  <i>(+{_pct(sig.tp2, sig.entry)})</i>\n"
-        f"⚖️ <b>R:R Ratio:</b>  <code>1 : {sig.rr:.1f}</code>\n\n"
+        f"📊 <b>Entry:</b>      <code>{_fmt(sig.entry)}</code>\n"
+        f"{sl_arrow} <b>Stop Loss:</b>   <code>{_fmt(sig.sl)}</code>  <i>(-{_pct(sig.entry, sig.sl)})</i>\n"
+        f"{tp_arrow} <b>TP1 (Quick):</b> <code>{_fmt(sig.tp1)}</code>  <i>(+{_pct(sig.tp1, sig.entry)})</i>\n"
+        f"{tp_arrow} <b>TP2 (Run):</b>   <code>{_fmt(sig.tp2)}</code>  <i>(+{_pct(sig.tp2, sig.entry)})</i>\n"
+        f"⚖️ <b>R:R Ratio:</b>   <code>1 : {sig.rr:.1f}</code>\n"
+        f"🔧 <b>Leverage:</b>    <code>{LEVERAGE_RANGE}</code> suggested\n\n"
         f"📡 <b>Confidence:</b> {confidence}%  <code>[{bar}]</code>\n"
         f"⏱ <b>Timeframe:</b>  {sig.timeframe}\n\n"
         f"<b>Strategy Votes:</b>\n" + "\n".join(votes) + "\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"⚠️ <i>DYOR. Not financial advice. Manage risk.</i>"
+        f"⚠️ <i>Futures = high risk. Use proper position sizing. DYOR.</i>"
     )
 
 

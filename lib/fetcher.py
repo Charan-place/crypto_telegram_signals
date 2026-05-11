@@ -6,7 +6,7 @@ from lib.config import EXCHANGE_ID, CANDLES
 async def fetch_ohlcv(symbol: str, timeframe: str) -> pd.DataFrame | None:
     exchange = getattr(ccxt, EXCHANGE_ID)({
         "enableRateLimit": True,
-        "options": {"defaultType": "spot"},
+        "options": {"defaultType": "future"},
     })
     try:
         raw = await exchange.fetch_ohlcv(symbol, timeframe, limit=CANDLES)
