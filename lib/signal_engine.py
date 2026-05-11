@@ -61,14 +61,14 @@ def _rsi_macd(df: pd.DataFrame) -> int:
         s, s1 = df["macd_signal"].iloc[-1], df["macd_signal"].iloc[-2]
 
         # Strong: RSI exits extreme + fresh MACD cross
-        if r1 < 32 and r > 32 and m > s and m1 <= s1:
+        if r1 < 38 and r > 38 and m > s and m1 <= s1:
             return 1
-        if r1 > 68 and r < 68 and m < s and m1 >= s1:
+        if r1 > 62 and r < 62 and m < s and m1 >= s1:
             return -1
-        # Softer: zone + direction
-        if r < 40 and m > s:
+        # Softer: zone + direction agree
+        if r < 45 and m > s:
             return 1
-        if r > 60 and m < s:
+        if r > 55 and m < s:
             return -1
     except (KeyError, IndexError):
         pass
@@ -82,10 +82,10 @@ def _stoch_rsi(df: pd.DataFrame) -> int:
         d, d1 = df["stoch_d"].iloc[-1], df["stoch_d"].iloc[-2]
 
         # K crosses above D from oversold
-        if k1 < d1 and k > d and k < 0.3:
+        if k1 < d1 and k > d and k < 0.4:
             return 1
         # K crosses below D from overbought
-        if k1 > d1 and k < d and k > 0.7:
+        if k1 > d1 and k < d and k > 0.6:
             return -1
     except (KeyError, IndexError):
         pass
@@ -110,9 +110,9 @@ def _bollinger(df: pd.DataFrame) -> int:
     try:
         bp  = df["bb_pct"].iloc[-1]
         rsi = df["rsi"].iloc[-1]
-        if bp < 0.08 and rsi < 40:
+        if bp < 0.15 and rsi < 48:
             return 1
-        if bp > 0.92 and rsi > 60:
+        if bp > 0.85 and rsi > 52:
             return -1
     except (KeyError, IndexError):
         pass
@@ -140,7 +140,7 @@ def _volume_surge(df: pd.DataFrame) -> int:
     try:
         vol    = df["volume"].iloc[-1]
         vol_ma = df["vol_ma20"].iloc[-1]
-        if vol > vol_ma * 2.0:   # 2x threshold for noisy 15m
+        if vol > vol_ma * 1.3:   # 1.3x — meme coins spike hard
             c, o = df["close"].iloc[-1], df["open"].iloc[-1]
             return 1 if c > o else -1
     except (KeyError, IndexError):
