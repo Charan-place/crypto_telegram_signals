@@ -4,5 +4,15 @@
       "path": "/api/scan",
       "schedule": "*/2 * * * *"
     }
-  ]
+  ],
+  "functions": {
+    "api/scan.py": {
+      "runtime": "python3.11",
+      "maxDuration": 60
+    },
+    "api/webhook.py": {
+      "runtime": "python3.11",
+      "maxDuration": 10
+    }
+  }
 }
